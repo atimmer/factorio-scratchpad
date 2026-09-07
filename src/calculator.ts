@@ -1,4 +1,4 @@
-export type Result = { source: string; value?: number; error?: string };
+export type Result = { source: string; value?: number; unit?: string; error?: string };
 
 // A deliberately small arithmetic grammar: never execute scratchpad text as code.
 export function evaluate(source: string, variables: Map<string, number>): number {
@@ -85,12 +85,12 @@ export function calculate(text: string): Result[] {
   return text.split('\n').map((source) => {
     if (!source.trimEnd().endsWith('=')) return { source };
     const formula = source.trim().slice(0, -1).trim();
-    const assignment = /^([a-zA-Z_][a-zA-Z_0-9]*)\s*=\s*(.*)$/.exec(formula);
+    const assignment = /^([a-zA-Z_][a-zA-Z_0-9]*)\s*(?:\[([^\[\]]+)\]\s*)?=\s*(.*)$/.exec(formula);
     if (assignment) variables.delete(assignment[1]);
     try {
-      const value = evaluate(assignment ? assignment[2] : formula, variables);
+      const value = evaluate(assignment ? assignment[3] : formula, variables);
       if (assignment) variables.set(assignment[1], value);
-      return { source, value };
+      return { source, value, unit: assignment?.[2]?.trim() || undefined };
     } catch (error) {
       return { source, error: error instanceof Error ? error.message : 'Invalid formula' };
     }

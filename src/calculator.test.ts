@@ -35,3 +35,17 @@ test('coal liquefaction example has correct flow and plant counts', () => {
   assert.ok(Math.abs(value('gas_total =') - 111.66666666666667) < 1e-10);
   assert.equal(format(0.1 + 0.2), '0.3');
 });
+
+test('unit labels annotate declarations without changing or propagating through arithmetic', () => {
+  const rows = calculate('coal [items/s] = 20 =\nenergy [ MJ / s ] = coal * 4 =\ncoal / 2 =\ncoal [kg] = 3 =\ncoal =');
+  assert.deepEqual(rows.map(r => r.value), [20, 80, 10, 3, 3]);
+  assert.deepEqual(rows.map(r => r.unit), ['items/s', 'MJ / s', undefined, 'kg', undefined]);
+  assert.equal(rows[0].source, 'coal [items/s] = 20 =');
+});
+test('annotated notes still need a trailing equals and invalid formulas stay errors', () => {
+  const rows = calculate('coal [items/s] = 20\ncoal =\nx [MW] = 1 / 0 =\n2 + 2 =');
+  assert.equal(rows[0].value, undefined);
+  assert.match(rows[1].error!, /Define coal/);
+  assert.match(rows[2].error!, /zero/);
+  assert.equal(rows[3].value, 4);
+});

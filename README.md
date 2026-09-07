@@ -27,8 +27,11 @@ Supports `+`, `-`, `*`, `/`, `^`, parentheses, decimal/scientific notation, post
 percent (`20%` means `0.2`), and `ceil`, `floor`, `round`, `abs`, `sqrt`, `min`, `max`.
 Exponentiation associates right and precedes unary minus. Results display up to
 10 significant digits; intermediate calculations use JavaScript number precision.
-Invalid formulas show inline errors without stopping other lines. Units and labels
-belong on separate note lines. No automatic recipe solving or unit conversion.
+Invalid formulas show inline errors without stopping other lines. Optional units go in brackets after a variable name: `coal [items/s] = 20 =`
+displays `20 items/s`. Reference the number as `coal` in later formulas. Labels
+are arbitrary text (for example `heavy oil/s` or `MW`) and only annotate that
+declaration’s result; they do not affect arithmetic, convert units, or propagate
+to other expressions. No automatic recipe solving or unit conversion.
 
 The starter example uses standard coal liquefaction and cracking with crafting
 speed 1, no modules/beacons/productivity, and recycles 25 heavy oil per cycle.
