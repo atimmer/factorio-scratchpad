@@ -49,3 +49,24 @@ test('annotated notes still need a trailing equals and invalid formulas stay err
   assert.match(rows[2].error!, /zero/);
   assert.equal(rows[3].value, 4);
 });
+
+// Renaming must preserve both calculation meaning and free-form notes.
+import { renameVariable, variableNames } from './rename';
+test('rename updates all exact references and repeated definitions, preserving notes and units', () => {
+  const notes = 'coal is useful\ncoal [coal/s] = 20 =\ncoal_total = coal * 4 =\ncoal = 10 =\ncoal_total / coal =';
+  const renamed = renameVariable(notes, 'coal', 'fuel');
+  assert.equal(renamed, 'coal is useful\nfuel [coal/s] = 20 =\ncoal_total = fuel * 4 =\nfuel = 10 =\ncoal_total / fuel =');
+  assert.deepEqual(calculate(renamed).map(r => r.value), calculate(notes).map(r => r.value));
+  assert.deepEqual(variableNames(renamed), ['fuel', 'coal_total']);
+});
+test('rename preserves function names, scientific notation, whitespace and unfinished notes', () => {
+  const notes = 'e3 = 4 =\nround = 2 =\n round + round(e3) + 1e3 =  \ne3 = 10';
+  assert.equal(renameVariable(notes, 'e3', 'x'), 'x = 4 =\nround = 2 =\n round + round(x) + 1e3 =  \ne3 = 10');
+  assert.equal(renameVariable(notes, 'round', 'rounded'), 'e3 = 4 =\nrounded = 2 =\n rounded + round(e3) + 1e3 =  \ne3 = 10');
+});
+test('rename rejects invalid names and collisions including unresolved references', () => {
+  const notes = 'x = 1 =\ny = 2 =\nz + x =';
+  for (const name of ['1x', 'two words', '', 'x', 'y', 'z']) assert.throws(() => renameVariable(notes, 'x', name));
+  assert.throws(() => renameVariable(notes, 'missing', 'a'));
+  assert.doesNotThrow(() => renameVariable('x = 1 =\nceil(x) =', 'x', 'ceil'));
+});

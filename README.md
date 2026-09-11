@@ -64,3 +64,13 @@ calculator tests and the TypeScript/production build, then deploys `dist/` on ma
 Pull requests run checks without deployment. Vite's base is `/factorio-scratchpad/`.
 This follows [Vite's GitHub Pages guidance](https://vite.dev/guide/static-deploy#github-pages).
 Project-specific agent instructions are in `AGENTS.md`.
+
+## Rename a variable
+
+Click **Rename variable**, choose an existing variable, enter its new name, and
+click **Rename all uses**. All definitions of that name and exact references in
+formula lines are updated together and saved normally. Plain notes, lines without
+a final `=`, unit labels, function names, scientific notation, and longer names
+containing the old name are preserved. Renaming is case-sensitive. Invalid names
+and names already referenced in formulas are rejected to avoid merging variables.
+The rename logic lives in `src/rename.ts` and is covered by the calculator tests.
